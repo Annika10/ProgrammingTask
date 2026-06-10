@@ -32,15 +32,19 @@ The architecture of the program consists of the following components:
           parameters, can be run locally on CPU)
     - vector database: this is where the documents are stored as vectors
         - library: chromadb (integrateable with langchain, local + cloud, open source)
-- [LLM chatbot](src/rag_chatbot.py): this is the language model that generates the response based on the retrieved
+- [LLM chatbot](src/llm_chatbot.py): this is the language model that generates the response based on the retrieved
   documents and the user's query
-    - library: Ollama (local LLM hosting possible, easy usage in Python, no API key needed, open source models
+    - library: Ollama (local + cloud LLM hosting possible, easy usage in Python, no API key needed, open source models
       available)
     - model:
-        - first idea: Qwen3-8B (comparison of different models on the HuggingFace leaderboard for text generation ->
-          most
-          downloaded, smaller model that still can be run locally on CPU) -> way to slow
-        - final choice: gemma3:4b ("most capable model that runs on a single GPU")
+        - local LLM:
+            - first idea: Qwen3-8B (comparison of different models on the HuggingFace leaderboard for text generation ->
+              most
+              downloaded, smaller model that still can be run locally on CPU) -> way to slow
+            - final choice: gemma3:4b ("most capable model that runs on a single GPU")
+        - cloud LLM: only free cloud LLMs are possible (sort most downloaded models from ollama cloud models)
+            - first idea: qwen3.5-cloud (not available for free cloud usage) -> not possible
+            - final choice: gemma4:31b-cloud
 
 The workflow is shown in the following sequence diagram:
 
@@ -84,9 +88,9 @@ The following steps can be taken to implement this test case:
 
 ### Architecture
 
-1. local LLM: chosen due to costs of using cloud LLMs, but limited by the performance of small models that can be run
-   locally on CPU.
-   <br> -> use cloud LLMs or LLMs run on a GPU for better performance
+1. local LLM/ free cloud LLM: only local/free cloud LLM models usable due to costs of using bigger cloud LLMs
+   excessively, which limits the performance.
+   <br> -> use bigger cloud LLMs or LLMs run on a GPU for better performance
 2. containerization: currently the different components of the architecture are not containerized, which can lead to
    issues with dependencies and scalability.
    <br> -> containerize the different components of the architecture (e.g. with Docker)
@@ -123,6 +127,9 @@ The following steps can be taken to implement this test case:
    that can be retrieved and used by the agent.
    <br> -> include other types of data (e.g. images, videos, etc.) and file formats to provide more information to the
    agent
+5. RAG improvement: currently chunk size and other parameters of the RAG module are not optimized, which can lead to
+   suboptimal retrieval performance.
+   <br> -> optimize the parameters of the RAG module (e.g. chunk size, number of retrieved documents, etc.)
 
 ### Scaling
 
