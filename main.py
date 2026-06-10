@@ -2,12 +2,12 @@ import argparse
 from src.rag_chatbot import RAGChatbot
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="RAG Chatbot")
     parser.add_argument("--local", action="store_true",
                         help="Use local LLM instead of cloud")
     args = parser.parse_args()
-
+    
     chatbot = RAGChatbot(local=args.local)
     
     print("\n" + "=" * 60)

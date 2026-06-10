@@ -6,17 +6,25 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
+from dotenv import load_dotenv
 from src.config import collection_name, path_to_data
 
+
 class Rag:
-    def __init__(self):
+    def __init__(self) -> None:
+        """
+        initialize RAG module by loading data, creating embeddings and vectorstore
+        """
+        load_dotenv()
+        self.hf_token = os.getenv("HF_TOKEN")
+        print(self.hf_token)
         print("### Creating vectorstore ###")
         
         # delete old database, if exists
         persist_dir = "./chroma_db"
         
         if os.path.exists(persist_dir):
-           shutil.rmtree(persist_dir)
+            shutil.rmtree(persist_dir)
         
         # load data - convert html directly to documents
         docs = []
@@ -54,9 +62,10 @@ class Rag:
             self.db = None
             print("### didn't create vectorstore ###")
             return
-            
+        
         # create embeddings
-        embeddings = HuggingFaceEmbeddings(model_name="microsoft/harrier-oss-v1-0.6b")
+        embeddings = HuggingFaceEmbeddings(model_name="microsoft/harrier-oss-v1-0.6b",
+                                           model_kwargs={"token": self.hf_token})
         
         # create vectorstore
         self.db = Chroma(
@@ -69,7 +78,16 @@ class Rag:
         
         print("### Vectorstore created ###")
     
-    def retrieve_data(self, userinput) -> str:
+    def retrieve_data(self, userinput: str) -> str:
+        """
+        retrieve relevant data from vectorstore based on user input
+        Args:
+            userinput (str): input given by user per console
+
+        Returns:
+            relevant document content from vectorstore as string
+
+        """
         if not self.db:
             print("Warning: database is empty.")
             return ""

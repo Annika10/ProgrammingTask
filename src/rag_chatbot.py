@@ -7,7 +7,12 @@ from dotenv import load_dotenv
 
 
 class RAGChatbot:
-    def __init__(self, local: bool = False):
+    def __init__(self, local: bool = False) -> None:
+        """
+        initialize LLM Chatbot
+        Args:
+            local (bool): determines if a local LLM or cloud LLM is used
+        """
         load_dotenv()
         self.api_key = os.getenv("OLLAMA_API_KEY")
         if local:
@@ -22,6 +27,13 @@ class RAGChatbot:
         self.max_history_length = 10
     
     def add_to_history(self, role: str, content: str) -> None:
+        """
+        add current conversation input in history and maintain history lengths
+        Args:
+            role (str): role of conversation input (either system, assistant, or user)
+            content (str): content of conversation part
+        Returns: None
+        """
         self.conversation_history.append({"role": role, "content": content})
         
         # Limit history to prevent token bloat
@@ -29,7 +41,14 @@ class RAGChatbot:
             self.conversation_history = self.conversation_history[-self.max_history_length:]
     
     def chat(self, user_input: str) -> Optional[str]:
-        """Process user input and return assistant response"""
+        """
+        Process user input and return assistant response
+        Args:
+            user_input (str): current user input
+
+        Returns:
+            Optional[str]: assistant response or None if error occurs
+        """
         self.add_to_history("user", user_input)
         
         data = self.rag.retrieve_data(user_input)
@@ -65,6 +84,9 @@ class RAGChatbot:
             return None
     
     def clear_history(self) -> None:
-        """Clear conversation history"""
+        """
+        Clear conversation history
+        Returns: None
+        """
         self.conversation_history = [{"role": "system", "content": SYSTEM_PROMPT}]
         print("Conversation history cleared.")
