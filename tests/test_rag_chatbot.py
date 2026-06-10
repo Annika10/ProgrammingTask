@@ -10,13 +10,13 @@ class TestRAGChatbot:
     @pytest.fixture
     def mock_rag(self):
         """Mock the Rag class to avoid loading actual data"""
-        with patch('rag_chatbot.Rag') as mock:
+        with patch('src.rag_chatbot.Rag') as mock:
             yield mock
     
     @pytest.fixture
     def mock_ollama_client(self):
         """Mock the Ollama client"""
-        with patch('rag_chatbot.ollama.Client') as mock:
+        with patch('src.rag_chatbot.ollama.Client') as mock:
             yield mock
     
     @pytest.fixture
@@ -33,7 +33,7 @@ class TestRAGChatbot:
     
     def test_chatbot_initialization(self, chatbot):
         """Test that chatbot initializes with correct attributes"""
-        assert chatbot.conversation_history == []
+        assert chatbot.conversation_history == [{"role": "system", "content": SYSTEM_PROMPT}]
         assert chatbot.max_history_length == 10
         assert chatbot.rag is not None
         assert chatbot.client is not None
@@ -42,17 +42,17 @@ class TestRAGChatbot:
         """Test adding user message to history"""
         chatbot.add_to_history("user", "Hello")
         
-        assert len(chatbot.conversation_history) == 1
-        assert chatbot.conversation_history[0]["role"] == "user"
-        assert chatbot.conversation_history[0]["content"] == "Hello"
+        assert len(chatbot.conversation_history) == 2
+        assert chatbot.conversation_history[1]["role"] == "user"
+        assert chatbot.conversation_history[1]["content"] == "Hello"
     
     def test_add_to_history_assistant_message(self, chatbot):
         """Test adding assistant message to history"""
         chatbot.add_to_history("assistant", "Hi there!")
         
-        assert len(chatbot.conversation_history) == 1
-        assert chatbot.conversation_history[0]["role"] == "assistant"
-        assert chatbot.conversation_history[0]["content"] == "Hi there!"
+        assert len(chatbot.conversation_history) == 2
+        assert chatbot.conversation_history[1]["role"] == "assistant"
+        assert chatbot.conversation_history[1]["content"] == "Hi there!"
     
     def test_history_limit_enforcement(self, chatbot):
         """Test that conversation history respects max_history_length"""
@@ -84,7 +84,7 @@ class TestRAGChatbot:
             response = chatbot.chat("Test question")
         
         assert response == "Hello there!"
-        assert len(chatbot.conversation_history) == 2  # user + assistant
+        assert len(chatbot.conversation_history) == 3  # system + user + assistant
     
     def test_chat_adds_messages_to_history(self, chatbot):
         """Test that chat adds both user and assistant messages to history"""
@@ -95,9 +95,9 @@ class TestRAGChatbot:
         with patch('builtins.print'):
             chatbot.chat("Question")
         
-        assert len(chatbot.conversation_history) == 2
-        assert chatbot.conversation_history[0]["role"] == "user"
-        assert chatbot.conversation_history[1]["role"] == "assistant"
+        assert len(chatbot.conversation_history) == 3
+        assert chatbot.conversation_history[1]["role"] == "user"
+        assert chatbot.conversation_history[2]["role"] == "assistant"
     
     def test_chat_error_handling(self, chatbot):
         """Test that chat handles exceptions gracefully"""
@@ -113,12 +113,12 @@ class TestRAGChatbot:
         chatbot.add_to_history("user", "Message 1")
         chatbot.add_to_history("assistant", "Response 1")
         
-        assert len(chatbot.conversation_history) == 2
+        assert len(chatbot.conversation_history) == 3
         
         with patch('builtins.print'):
             chatbot.clear_history()
         
-        assert len(chatbot.conversation_history) == 0
+        assert len(chatbot.conversation_history) == 1
     
     def test_chat_system_prompt_included(self, chatbot):
         """Test that system prompt is included in messages"""
@@ -153,7 +153,7 @@ class TestRAGChatbotIntegration:
     
     @pytest.fixture
     def mock_rag(self):
-        with patch('rag_chatbot.Rag') as mock:
+        with patch('src.rag_chatbot.Rag') as mock:
             mock_instance = Mock()
             mock_instance.retrieve_data.return_value = "Beckhoff is a technology company"
             mock.return_value = mock_instance
@@ -161,7 +161,7 @@ class TestRAGChatbotIntegration:
     
     @pytest.fixture
     def mock_client(self):
-        with patch('rag_chatbot.ollama.Client') as mock:
+        with patch('src.rag_chatbot.ollama.Client') as mock:
             yield mock
     
     @pytest.fixture
@@ -182,7 +182,7 @@ class TestRAGChatbotIntegration:
             chatbot.chat("Question 2")
             chatbot.chat("Question 3")
         
-        assert len(chatbot.conversation_history) == 6  # 3 user + 3 assistant
+        assert len(chatbot.conversation_history) == 7  # system + 3 user + 3 assistant
     
     def test_history_includes_previous_context(self, chatbot):
         """Test that previous messages are included in context"""
@@ -194,7 +194,7 @@ class TestRAGChatbotIntegration:
             chatbot.chat("First question")
             chatbot.chat("Second question")
         
-        assert len(chatbot.conversation_history) == 4
+        assert len(chatbot.conversation_history) == 5
 
 
 class TestOllamaConfiguration:
@@ -202,9 +202,9 @@ class TestOllamaConfiguration:
     
     def test_ollama_client_with_custom_host(self):
         """Test that Ollama client is initialized with custom HOST_LLM if defined"""
-        with patch('rag_chatbot.Rag'):
-            with patch('rag_chatbot.HOST_LLM', 'http://custom-host:11434'):
-                with patch('rag_chatbot.Client') as mock_client_class:
+        with patch('src.rag_chatbot.Rag'):
+            with patch('src.rag_chatbot.HOST_LLM', 'http://custom-host:11434'):
+                with patch('src.rag_chatbot.Client') as mock_client_class:
                     RAGChatbot()
                     
                     # Verify Client was called with the custom host
@@ -212,9 +212,9 @@ class TestOllamaConfiguration:
     
     def test_ollama_client_without_custom_host(self):
         """Test that Ollama default client is used when HOST_LLM is None"""
-        with patch('rag_chatbot.Rag'):
-            with patch('rag_chatbot.HOST_LLM', None):
-                with patch('rag_chatbot.ollama.Client') as mock_default_client:
+        with patch('src.rag_chatbot.Rag'):
+            with patch('src.rag_chatbot.HOST_LLM', None):
+                with patch('src.rag_chatbot.ollama.Client') as mock_default_client:
                     RAGChatbot()
                     
                     # Verify default ollama.Client() was called
@@ -227,12 +227,12 @@ class TestOllamaIntegration:
     @pytest.fixture
     def chatbot_with_mocks(self):
         """Create a chatbot with properly mocked Ollama client"""
-        with patch('rag_chatbot.Rag') as mock_rag_class:
+        with patch('src.rag_chatbot.Rag') as mock_rag_class:
             mock_rag = Mock()
             mock_rag.retrieve_data.return_value = "Test context"
             mock_rag_class.return_value = mock_rag
             
-            with patch('rag_chatbot.Client') as mock_client_class:
+            with patch('src.rag_chatbot.Client') as mock_client_class:
                 mock_client = Mock()
                 mock_client.chat.return_value = [{"message": {"content": "Response"}}]
                 mock_client_class.return_value = mock_client
@@ -282,9 +282,9 @@ class TestOllamaIntegration:
     
     def test_host_parameter_used_when_configured(self):
         """Test that HOST_LLM configuration is passed to Ollama Client"""
-        with patch('rag_chatbot.Rag'):
-            with patch('rag_chatbot.HOST_LLM', 'http://localhost:11434'):
-                with patch('rag_chatbot.Client') as mock_client_class:
+        with patch('src.rag_chatbot.Rag'):
+            with patch('src.rag_chatbot.HOST_LLM', 'http://localhost:11434'):
+                with patch('src.rag_chatbot.Client') as mock_client_class:
                     RAGChatbot()
                     
                     # Verify Client was initialized with host parameter
@@ -294,9 +294,9 @@ class TestOllamaIntegration:
     
     def test_default_client_used_when_host_none(self):
         """Test that default Ollama client is used when HOST_LLM is None"""
-        with patch('rag_chatbot.Rag'):
-            with patch('rag_chatbot.HOST_LLM', None):
-                with patch('rag_chatbot.ollama.Client') as mock_ollama_client:
+        with patch('src.rag_chatbot.Rag'):
+            with patch('src.rag_chatbot.HOST_LLM', None):
+                with patch('src.rag_chatbot.ollama.Client') as mock_ollama_client:
                     RAGChatbot()
                     
                     # Should use default ollama.Client() without host parameter

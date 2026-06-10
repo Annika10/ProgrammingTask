@@ -37,14 +37,14 @@ class TestRag:
     @pytest.fixture
     def mock_config(self, temp_data_dir):
         """Mock the config module"""
-        with patch('rag.collection_name', 'test_collection'):
-            with patch('rag.path_to_data', temp_data_dir):
+        with patch('src.rag.collection_name', 'test_collection'):
+            with patch('src.rag.path_to_data', temp_data_dir):
                 yield
     
     @pytest.fixture
     def mock_chroma(self):
         """Mock the Chroma vectorstore"""
-        with patch('rag.Chroma') as mock:
+        with patch('src.rag.Chroma') as mock:
             mock_instance = Mock()
             mock_instance.similarity_search.return_value = []
             mock.return_value = mock_instance
@@ -53,8 +53,8 @@ class TestRag:
     @pytest.fixture
     def rag(self, mock_config, mock_chroma):
         """Create a Rag instance with mocks"""
-        with patch('rag.HuggingFaceEmbeddings'):
-            with patch('rag.RecursiveCharacterTextSplitter'):
+        with patch('src.rag.HuggingFaceEmbeddings'):
+            with patch('src.rag.RecursiveCharacterTextSplitter'):
                 with patch('builtins.print'):
                     return Rag()
     
@@ -121,10 +121,10 @@ class TestRag:
             """
             Path(temp_dir, "test.html").write_text(html_content)
             
-            with patch('rag.path_to_data', temp_dir):
-                with patch('rag.Chroma') as mock_chroma:
-                    with patch('rag.HuggingFaceEmbeddings'):
-                        with patch('rag.RecursiveCharacterTextSplitter'):
+            with patch('src.rag.path_to_data', temp_dir):
+                with patch('src.rag.Chroma') as mock_chroma:
+                    with patch('src.rag.HuggingFaceEmbeddings'):
+                        with patch('src.rag.RecursiveCharacterTextSplitter'):
                             with patch('builtins.print'):
                                 rag = Rag()
             
@@ -150,15 +150,15 @@ class TestRagDocumentProcessing:
     @pytest.fixture
     def mock_embeddings(self):
         """Mock embeddings"""
-        with patch('rag.HuggingFaceEmbeddings') as mock:
+        with patch('src.rag.HuggingFaceEmbeddings') as mock:
             yield mock
     
     @pytest.fixture
     def mock_text_splitter(self):
         """Mock text splitter"""
-        with patch('rag.RecursiveCharacterTextSplitter') as mock:
+        with patch('src.rag.RecursiveCharacterTextSplitter') as mock:
             mock_instance = Mock()
-            mock_instance.split_documents.return_value = []
+            mock_instance.split_documents.return_value = [Mock(page_content="test content")]
             mock.return_value = mock_instance
             yield mock
     
@@ -168,8 +168,8 @@ class TestRagDocumentProcessing:
         try:
             Path(temp_dir, "test.html").write_text("<html><p>Test</p></html>")
             
-            with patch('rag.path_to_data', temp_dir):
-                with patch('rag.Chroma'):
+            with patch('src.rag.path_to_data', temp_dir):
+                with patch('src.rag.Chroma'):
                     with patch('builtins.print'):
                         Rag()
             
@@ -186,8 +186,8 @@ class TestRagDocumentProcessing:
         try:
             Path(temp_dir, "test.html").write_text("<html><p>Test</p></html>")
             
-            with patch('rag.path_to_data', temp_dir):
-                with patch('rag.Chroma'):
+            with patch('src.rag.path_to_data', temp_dir):
+                with patch('src.rag.Chroma'):
                     with patch('builtins.print'):
                         Rag()
             
