@@ -10,6 +10,58 @@ This agent can help employees to quickly find information about the company with
 or ask colleagues.
 This would be especially useful for product details, where the information is often very detailed.
 
+## Installation & Usage
+
+Create a virtual environment, activate it and install the required dependencies with the following commands:
+
+```bash
+python -m venv programming_task
+```
+
+```bash
+source programming_task/bin/activate
+``` 
+
+```bash
+pip install -r requirements.txt
+```
+
+### Using Agent with a Cloud LLM
+
+To run the agent with a cloud LLM create a [ollama](ollama.com) account and create an API key.
+Then, add the API key as a string to the [.env](.env) file in the root of the project with the variable name
+`OLLAMA_API_KEY`.
+
+Afterwards you can start the agent with the following command:
+
+```bash
+python main.py
+```
+
+### Using Agent with a Local LLM
+
+You can also use a local LLM. For this download a model that can be run locally on your PC (e.g. gemma3) from ollama:
+
+```bash
+ollama pull gemma3
+```
+
+Adjust the variable `LOCAL_MODEL_LLM` in the [config.py](src/config.py) file to the name of the model you downloaded (
+e.g. `gemma3`).
+Then, you can start the agent with the following command:
+
+```bash
+python main.py --local
+```
+
+### Testing
+
+Run the unit tests with the following command:
+
+```bash
+pytest tests/
+```
+
 ## Architecture
 
 The architecture of the program consists of the following components:
@@ -54,16 +106,6 @@ The user inputs a query, which is then processed by the RAG module to retrieve r
 database.
 The retrieved documents and the user input are then passed to the LLM chatbot, which generates a response based on the
 documents and the user's query.
-
-## Testing
-
-Run the unit tests with the following command:
-
-FIXME: right pass missing
-
-```bash
-pytest tests/
-```
 
 ### Code Quality
 
