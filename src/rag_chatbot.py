@@ -4,11 +4,12 @@ from src.rag import Rag
 from typing import Optional
 from src.config import SYSTEM_PROMPT, MODEL_LLM, HOST_LLM
 
+
 class RAGChatbot:
     def __init__(self):
         self.client = Client(host=HOST_LLM) if HOST_LLM else ollama.Client()
         self.rag = Rag()
-        self.conversation_history = []
+        self.conversation_history = [{"role": "system", "content": SYSTEM_PROMPT}]
         self.max_history_length = 10
     
     def add_to_history(self, role: str, content: str) -> None:
@@ -18,30 +19,20 @@ class RAGChatbot:
         if len(self.conversation_history) > self.max_history_length:
             self.conversation_history = self.conversation_history[-self.max_history_length:]
     
-    def get_message_context(self, user_input: str) -> str:
-        data = self.rag.retrieve_data(user_input)
-        return (
-            "Nutze die folgenden Informationen zur Beantwortung der Frage:\n\n"
-            f"Kontext:\n{data}"
-        )
-    
     def chat(self, user_input: str) -> Optional[str]:
         """Process user input and return assistant response"""
         self.add_to_history("user", user_input)
         
-        context = self.get_message_context(user_input)
+        data = self.rag.retrieve_data(user_input)
+        prompt_text = \
+            (
+                "Nutze die folgenden Informationen zur Beantwortung der Frage. "
+                f"Kontext:\n{data}\n\n"
+                f"Frage:\n{user_input}"
+            )
         
-        # Build messages with system prompt and conversation history
-        messages = [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"{context}\n\nFrage:\n{user_input}"}
-        ]
-        
-        # Add recent history for context (excluding the current message)
-        if len(self.conversation_history) > 1:
-            for msg in self.conversation_history[:-1]:
-                if msg["role"] != "user":  # Don't duplicate current user input
-                    messages.append(msg)
+        # Build messages with conversation history and current prompt
+        messages = self.conversation_history + [{"role": "user", "content": f"{prompt_text}"}]
         
         try:
             full_response = ""
@@ -65,5 +56,5 @@ class RAGChatbot:
     
     def clear_history(self) -> None:
         """Clear conversation history"""
-        self.conversation_history = []
+        self.conversation_history = [{"role": "system", "content": SYSTEM_PROMPT}]
         print("Conversation history cleared.")
