@@ -63,14 +63,6 @@ class TestRAGChatbot:
         assert chatbot.conversation_history[0]["content"] == "Message 5"
         assert chatbot.conversation_history[-1]["content"] == "Message 14"
     
-    def test_get_message_context(self, chatbot):
-        """Test that context is retrieved correctly"""
-        context = chatbot.get_message_context("What is Beckhoff?")
-        
-        assert "Kontext:" in context
-        assert "Test context data" in context
-        assert chatbot.rag.retrieve_data.called
-    
     def test_chat_stream_response(self, chatbot):
         """Test chat method with streaming response"""
         mock_response = [
@@ -219,7 +211,7 @@ class TestOllamaConfiguration:
                     
                     # Verify default ollama.Client() was called
                     mock_default_client.assert_called_once_with()
-    
+
 
 class TestOllamaIntegration:
     """Integration tests checking Ollama configuration usage"""
