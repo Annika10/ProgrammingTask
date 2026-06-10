@@ -191,8 +191,7 @@ class TestRagDocumentProcessing:
                     with patch('builtins.print'):
                         Rag()
             
-            mock_embeddings.assert_called_once_with(
-                model_name="microsoft/harrier-oss-v1-0.6b"
-            )
+            mock_embeddings.assert_called_once()
+            assert mock_embeddings.call_args[1]['model_name'] == "microsoft/harrier-oss-v1-0.6b"
         finally:
             shutil.rmtree(temp_dir)

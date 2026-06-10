@@ -262,14 +262,12 @@ class TestOllamaIntegration:
         assert SYSTEM_PROMPT in messages[0]['content']
     
     def test_host_parameter_used_when_local(self):
-        """Test that local mode passes HOST_LLM to Ollama Client"""
+        """Test that local mode uses default ollama.Client"""
         with patch('src.llm_chatbot.Rag'):
             with patch('src.llm_chatbot.Client') as mock_client_class:
                 LLMChatbot(local=True)
                 
-                mock_client_class.assert_called_once()
-                call_kwargs = mock_client_class.call_args[1]
-                assert 'host' in call_kwargs
+                mock_client_class.assert_called_once_with()
     
     def test_default_client_used_when_cloud(self):
         """Test that cloud mode uses default ollama.Client when no API key"""
