@@ -10,5 +10,5 @@ Verhaltensvorgaben:
 collection_name = "unternehmen"
 path_to_data = "data_company"
 
-HOST_LLM = None
-MODEL_LLM = "gemma3"
+MODEL_LLM = "gemma4:31b-cloud"
+LOCAL_MODEL_LLM = "gemma3"

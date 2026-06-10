@@ -1,13 +1,22 @@
-import ollama
+import os
 from ollama import Client
 from src.rag import Rag
 from typing import Optional
-from src.config import SYSTEM_PROMPT, MODEL_LLM, HOST_LLM
+from src.config import SYSTEM_PROMPT, MODEL_LLM, LOCAL_MODEL_LLM
+from dotenv import load_dotenv
 
 
 class RAGChatbot:
-    def __init__(self):
-        self.client = Client(host=HOST_LLM) if HOST_LLM else ollama.Client()
+    def __init__(self, local: bool = False):
+        load_dotenv()
+        self.api_key = os.getenv("OLLAMA_API_KEY")
+        if local:
+            self.client = Client()
+            self.model = LOCAL_MODEL_LLM
+        else:
+            self.client = Client(host="https://ollama.com", headers={
+                'Authorization': 'Bearer ' + self.api_key}) if self.api_key else Client()
+            self.model = MODEL_LLM
         self.rag = Rag()
         self.conversation_history = [{"role": "system", "content": SYSTEM_PROMPT}]
         self.max_history_length = 10
@@ -37,7 +46,7 @@ class RAGChatbot:
         try:
             full_response = ""
             response = self.client.chat(
-                model=MODEL_LLM,
+                model=self.model,
                 messages=messages,
                 stream=True,
                 think=False
