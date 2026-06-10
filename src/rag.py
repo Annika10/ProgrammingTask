@@ -17,7 +17,6 @@ class Rag:
         """
         load_dotenv()
         self.hf_token = os.getenv("HF_TOKEN")
-        print(self.hf_token)
         print("### Creating vectorstore ###")
         
         # delete old database, if exists
