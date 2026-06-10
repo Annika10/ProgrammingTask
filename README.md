@@ -51,6 +51,35 @@ database.
 The retrieved documents and the user input are then passed to the LLM chatbot, which generates a response based on the
 documents and the user's query.
 
+## Testing
+
+Run the unit tests with the following command:
+
+FIXME: right pass missing
+
+```bash
+pytest tests/
+```
+
+### Code Quality
+
+- use different modules for different components of the architecture (e.g. separate module for RAG, LLM chatbot, etc.)
+  to improve code organization and readability
+- implement unit tests in the [`tests`](tests) directory
+- use typ annotations and comments to improve code readability
+- use automatic code formatting tools to maintain a consistent code style
+
+### Example Test Case: Retrival Test
+
+In addition to unit tests, one should also test the retrieval of the RAG module with an example test case.
+This can be done by creating a test dataset with questions and answers about the Beckhoff company and evaluating if the
+RAG module retrieves the relevant documents that are expected.
+The following steps can be taken to implement this test case:
+
+1. Create a test dataset with questions and the expected document that should be retrieved by the RAG module
+2. Check if the relevant document was retrieved by the RAG module for each question in the test dataset
+3. Calculate the accuracy to evaluate the performance of the RAG module
+
 ## Limitations and Future Work
 
 ### Architecture
@@ -68,6 +97,15 @@ documents and the user's query.
    for improvement and compare different versions of the agent.
    <br> -> implement an evaluation process for the agent (e.g. create an evaluation dataset with questions & answers
    about the Beckhoff company, use metrics such as accuracy to evaluate the performance of the agent)
+2. no monitoring: currently there is no monitoring of the agent's performance or usage (e.g. answer quality,
+   halluzination rate, latency, token usage), which makes it difficult to identify issues and improve the agent over
+   time.
+   <br> -> implement a monitoring solution to track the agent's performance and usage (e.g. logging, analytics, github
+   pipelines)
+3. user feedback: currently there is no mechanism for users to provide feedback on the agent's responses, which makes it
+   difficult to improve the agent based on user needs.
+   <br> -> implement a user feedback mechanism to allow users to provide feedback on the agent's responses (e.g. thumbs
+   up/down, comment section, etc.)
 
 ### Use-Case Extensions
 
@@ -95,18 +133,6 @@ documents and the user's query.
 2. missing caching mechanism: currently there is no caching mechanism in place, which can lead to performance issues
    when the same queries are made multiple times.
    <br> -> implement a caching mechanism to store the results of previous queries & retrival results
-
-### Monitoring
-
-1. no monitoring: currently there is no monitoring of the agent's performance or usage (e.g. answer quality,
-   halluzination rate, latency, token usage), which makes it difficult to identify issues and improve the agent over
-   time.
-   <br> -> implement a monitoring solution to track the agent's performance and usage (e.g. logging, analytics, github
-   pipelines)
-2. user feedback: currently there is no mechanism for users to provide feedback on the agent's responses, which makes it
-   difficult to improve the agent based on user needs.
-   <br> -> implement a user feedback mechanism to allow users to provide feedback on the agent's responses (e.g. thumbs
-   up/down, comment section, etc.)
 
 ### Safety
 
