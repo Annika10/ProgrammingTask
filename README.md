@@ -12,7 +12,7 @@ This would be especially useful for product details, where the information is of
 
 The architecture of the program consists of the following components:
 - user: the user interacts with the agent through a console input
-- [RAG module](rag.py): this module is responsible for retrieving the relevant documents from the vector database based on the user's query
+- [RAG module](src/rag.py): this module is responsible for retrieving the relevant documents from the vector database based on the user's query
   - library: langchain for text splitting, embeddings model and database (local + cloud, different components for different steps of the RAG process are replaceable)
   - html parser: this component is responsible for parsing the html documents and extracting the relevant information to be stored in the vector database
     - libraries: BeautifulSoup (optimized for parsing html documents)
@@ -21,7 +21,7 @@ The architecture of the program consists of the following components:
     - model: microsoft/harrier-oss-v1-0.6b (comparison of different models on the [Embedding Leaderboard auf Huggingface](https://huggingface.co/spaces/mteb/leaderboard) for multilingual retrieval (for German), sort by performance on retrieval tasks, chosen because it is smaller than 1b parameters, can be run locally on CPU)
   - vector database: this is where the documents are stored as vectors
     - library: chromadb (integrateable with langchain, local + cloud, open source)
-- [LLM chatbot](rag_chatbot.py): this is the language model that generates the response based on the retrieved documents and the user's query
+- [LLM chatbot](src/rag_chatbot.py): this is the language model that generates the response based on the retrieved documents and the user's query
   - library: Ollama (local LLM hosting possible, easy usage in Python, no API key needed, open source models available)
   - model: Qwen3-0.6B (comparison of different models on the HuggingFace leaderboard for text generation -> most downloaded, small model, can be run locally on CPU, open source, good performance in text generation tasks)
 

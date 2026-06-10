@@ -1,7 +1,7 @@
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from rag_chatbot import RAGChatbot
-from config import SYSTEM_PROMPT
+from unittest.mock import Mock, patch
+from src.rag_chatbot import RAGChatbot
+from src.config import SYSTEM_PROMPT
 
 
 class TestRAGChatbot:

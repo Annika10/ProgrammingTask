@@ -6,7 +6,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
-from config import collection_name, path_to_data
+from src.config import collection_name, path_to_data
 
 class Rag:
     def __init__(self):
@@ -48,6 +48,12 @@ class Rag:
         documents = text_splitter.split_documents(docs)
         
         print(f"Number of Chunks: {len(documents)}\n")
+        
+        if not documents:
+            print("No documents found")
+            self.db = None
+            print("### didn't create vectorstore ###")
+            return
             
         # create embeddings
         embeddings = HuggingFaceEmbeddings(model_name="microsoft/harrier-oss-v1-0.6b")
@@ -64,5 +70,9 @@ class Rag:
         print("### Vectorstore created ###")
     
     def retrieve_data(self, userinput) -> str:
+        if not self.db:
+            print("Warning: database is empty.")
+            return ""
+        
         results = self.db.similarity_search(userinput, k=3)
         return "\n".join(doc.page_content for doc in results)

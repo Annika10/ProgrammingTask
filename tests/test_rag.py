@@ -1,9 +1,9 @@
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from pathlib import Path
 import tempfile
 import shutil
-from rag import Rag
+from src.rag import Rag
 
 
 class TestRag:

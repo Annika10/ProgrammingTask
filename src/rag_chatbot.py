@@ -1,8 +1,8 @@
 import ollama
 from ollama import Client
-from rag import Rag
+from src.rag import Rag
 from typing import Optional
-from config import SYSTEM_PROMPT, MODEL_LLM, HOST_LLM
+from src.config import SYSTEM_PROMPT, MODEL_LLM, HOST_LLM
 
 class RAGChatbot:
     def __init__(self):
