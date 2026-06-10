@@ -59,7 +59,7 @@ python main.py --local
 Run the unit tests with the following command:
 
 ```bash
-pytest tests/
+pytest tests
 ```
 
 ## Architecture
