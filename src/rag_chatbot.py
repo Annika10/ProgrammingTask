@@ -39,7 +39,8 @@ class RAGChatbot:
             response = self.client.chat(
                 model=MODEL_LLM,
                 messages=messages,
-                stream=True
+                stream=True,
+                think=False
             )
             
             for chunk in response:
