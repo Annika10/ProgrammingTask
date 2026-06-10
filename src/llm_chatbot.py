@@ -6,7 +6,7 @@ from src.config import SYSTEM_PROMPT, MODEL_LLM, LOCAL_MODEL_LLM
 from dotenv import load_dotenv
 
 
-class RAGChatbot:
+class LLMChatbot:
     def __init__(self, local: bool = False) -> None:
         """
         initialize LLM Chatbot

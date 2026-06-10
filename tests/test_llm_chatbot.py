@@ -1,27 +1,27 @@
 import pytest
 from unittest.mock import Mock, patch
-from src.rag_chatbot import RAGChatbot
+from src.llm_chatbot import LLMChatbot
 from src.config import SYSTEM_PROMPT
 
 
-class TestRAGChatbot:
-    """Tests for RAGChatbot class"""
+class TestLLMChatbot:
+    """Tests for LLMChatbot class"""
     
     @pytest.fixture
     def mock_rag(self):
         """Mock the Rag class to avoid loading actual data"""
-        with patch('src.rag_chatbot.Rag') as mock:
+        with patch('src.llm_chatbot.Rag') as mock:
             yield mock
     
     @pytest.fixture
     def mock_ollama_client(self):
         """Mock the Ollama client"""
-        with patch('src.rag_chatbot.ollama.Client') as mock:
+        with patch('src.llm_chatbot.Client') as mock:
             yield mock
     
     @pytest.fixture
     def chatbot(self, mock_rag, mock_ollama_client):
-        """Create a RAGChatbot instance with mocks"""
+        """Create a LLMChatbot instance with mocks"""
         mock_rag_instance = Mock()
         mock_rag_instance.retrieve_data.return_value = "Test context data"
         mock_rag.return_value = mock_rag_instance
@@ -29,7 +29,7 @@ class TestRAGChatbot:
         mock_client_instance = Mock()
         mock_ollama_client.return_value = mock_client_instance
         
-        return RAGChatbot()
+        return LLMChatbot()
     
     def test_chatbot_initialization(self, chatbot):
         """Test that chatbot initializes with correct attributes"""
@@ -137,15 +137,15 @@ class TestRAGChatbot:
             chatbot.chat("Test")
         
         call_args = chatbot.client.chat.call_args
-        assert call_args[1]['model'] == 'gemma3'
+        assert call_args[1]['model'] == 'gemma4:31b-cloud'
 
 
-class TestRAGChatbotIntegration:
-    """Integration tests for RAGChatbot"""
+class TestLLMChatbotIntegration:
+    """Integration tests for LLMChatbot"""
     
     @pytest.fixture
     def mock_rag(self):
-        with patch('src.rag_chatbot.Rag') as mock:
+        with patch('src.llm_chatbot.Rag') as mock:
             mock_instance = Mock()
             mock_instance.retrieve_data.return_value = "Beckhoff is a technology company"
             mock.return_value = mock_instance
@@ -153,12 +153,12 @@ class TestRAGChatbotIntegration:
     
     @pytest.fixture
     def mock_client(self):
-        with patch('src.rag_chatbot.ollama.Client') as mock:
+        with patch('src.llm_chatbot.Client') as mock:
             yield mock
     
     @pytest.fixture
     def chatbot(self, mock_rag, mock_client):
-        return RAGChatbot()
+        return LLMChatbot()
     
     def test_multiple_messages_conversation(self, chatbot):
         """Test a multi-turn conversation"""
@@ -192,24 +192,13 @@ class TestRAGChatbotIntegration:
 class TestOllamaConfiguration:
     """Tests for Ollama client configuration and connectivity"""
     
-    def test_ollama_client_with_custom_host(self):
-        """Test that Ollama client is initialized with custom HOST_LLM if defined"""
-        with patch('src.rag_chatbot.Rag'):
-            with patch('src.rag_chatbot.HOST_LLM', 'http://custom-host:11434'):
-                with patch('src.rag_chatbot.Client') as mock_client_class:
-                    RAGChatbot()
+    def test_ollama_client_with_cloud_mode(self):
+        """Test that cloud mode uses ollama.Client when no API key"""
+        with patch('src.llm_chatbot.Rag'):
+            with patch('src.llm_chatbot.Client') as mock_default_client:
+                with patch('src.llm_chatbot.os.getenv', return_value=None):
+                    LLMChatbot(local=False)
                     
-                    # Verify Client was called with the custom host
-                    mock_client_class.assert_called_once_with(host='http://custom-host:11434')
-    
-    def test_ollama_client_without_custom_host(self):
-        """Test that Ollama default client is used when HOST_LLM is None"""
-        with patch('src.rag_chatbot.Rag'):
-            with patch('src.rag_chatbot.HOST_LLM', None):
-                with patch('src.rag_chatbot.ollama.Client') as mock_default_client:
-                    RAGChatbot()
-                    
-                    # Verify default ollama.Client() was called
                     mock_default_client.assert_called_once_with()
 
 
@@ -219,17 +208,17 @@ class TestOllamaIntegration:
     @pytest.fixture
     def chatbot_with_mocks(self):
         """Create a chatbot with properly mocked Ollama client"""
-        with patch('src.rag_chatbot.Rag') as mock_rag_class:
+        with patch('src.llm_chatbot.Rag') as mock_rag_class:
             mock_rag = Mock()
             mock_rag.retrieve_data.return_value = "Test context"
             mock_rag_class.return_value = mock_rag
             
-            with patch('src.rag_chatbot.Client') as mock_client_class:
+            with patch('src.llm_chatbot.Client') as mock_client_class:
                 mock_client = Mock()
                 mock_client.chat.return_value = [{"message": {"content": "Response"}}]
                 mock_client_class.return_value = mock_client
                 
-                chatbot = RAGChatbot()
+                chatbot = LLMChatbot()
                 chatbot.client = mock_client
                 yield chatbot, mock_client
     
@@ -246,7 +235,7 @@ class TestOllamaIntegration:
         call_args, call_kwargs = mock_client.chat.call_args
         # MODEL_LLM should be passed
         assert 'model' in call_kwargs
-        assert call_kwargs['model'] == 'gemma3'
+        assert call_kwargs['model'] == 'gemma4:31b-cloud'
     
     def test_ollama_receives_streaming_enabled(self, chatbot_with_mocks):
         """Verify that streaming is enabled in Ollama calls"""
@@ -272,24 +261,21 @@ class TestOllamaIntegration:
         assert messages[0]['role'] == 'system'
         assert SYSTEM_PROMPT in messages[0]['content']
     
-    def test_host_parameter_used_when_configured(self):
-        """Test that HOST_LLM configuration is passed to Ollama Client"""
-        with patch('src.rag_chatbot.Rag'):
-            with patch('src.rag_chatbot.HOST_LLM', 'http://localhost:11434'):
-                with patch('src.rag_chatbot.Client') as mock_client_class:
-                    RAGChatbot()
-                    
-                    # Verify Client was initialized with host parameter
-                    mock_client_class.assert_called_once()
-                    call_kwargs = mock_client_class.call_args[1]
-                    assert call_kwargs.get('host') == 'http://localhost:11434'
+    def test_host_parameter_used_when_local(self):
+        """Test that local mode passes HOST_LLM to Ollama Client"""
+        with patch('src.llm_chatbot.Rag'):
+            with patch('src.llm_chatbot.Client') as mock_client_class:
+                LLMChatbot(local=True)
+                
+                mock_client_class.assert_called_once()
+                call_kwargs = mock_client_class.call_args[1]
+                assert 'host' in call_kwargs
     
-    def test_default_client_used_when_host_none(self):
-        """Test that default Ollama client is used when HOST_LLM is None"""
-        with patch('src.rag_chatbot.Rag'):
-            with patch('src.rag_chatbot.HOST_LLM', None):
-                with patch('src.rag_chatbot.ollama.Client') as mock_ollama_client:
-                    RAGChatbot()
+    def test_default_client_used_when_cloud(self):
+        """Test that cloud mode uses default ollama.Client when no API key"""
+        with patch('src.llm_chatbot.Rag'):
+            with patch('src.llm_chatbot.Client') as mock_ollama_client:
+                with patch('src.llm_chatbot.os.getenv', return_value=None):
+                    LLMChatbot(local=False)
                     
-                    # Should use default ollama.Client() without host parameter
                     mock_ollama_client.assert_called_once_with()

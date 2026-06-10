@@ -1,5 +1,5 @@
 import argparse
-from src.rag_chatbot import RAGChatbot
+from src.llm_chatbot import LLMChatbot
 
 
 def main() -> None:
@@ -8,7 +8,7 @@ def main() -> None:
                         help="Use local LLM instead of cloud")
     args = parser.parse_args()
     
-    chatbot = RAGChatbot(local=args.local)
+    chatbot = LLMChatbot(local=args.local)
     
     print("\n" + "=" * 60)
     print("🤖 RAG Chatbot")
