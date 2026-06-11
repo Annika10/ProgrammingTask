@@ -163,18 +163,6 @@ class TestLLMChatbotIntegration:
             chatbot.chat("Question 3")
         
         assert len(chatbot.conversation_history) == 7  # system + 3 user + 3 assistant
-    
-    def test_history_includes_previous_context(self, chatbot):
-        """Test that previous messages are included in context"""
-        chatbot.client.chat.return_value = [
-            {"message": {"content": "Response"}}
-        ]
-        
-        with patch('builtins.print'):
-            chatbot.chat("First question")
-            chatbot.chat("Second question")
-        
-        assert len(chatbot.conversation_history) == 5
 
 
 class TestOllamaConfiguration:
