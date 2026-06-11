@@ -100,18 +100,6 @@ class TestLLMChatbot:
         
         assert response is None
     
-    def test_clear_history(self, chatbot):
-        """Test clearing conversation history"""
-        chatbot.add_to_history("user", "Message 1")
-        chatbot.add_to_history("assistant", "Response 1")
-        
-        assert len(chatbot.conversation_history) == 3
-        
-        with patch('builtins.print'):
-            chatbot.clear_history()
-        
-        assert len(chatbot.conversation_history) == 1
-    
     def test_chat_system_prompt_included(self, chatbot):
         """Test that system prompt is included in messages"""
         chatbot.client.chat.return_value = [

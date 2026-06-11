@@ -52,6 +52,7 @@ class LLMChatbot:
         self.add_to_history("user", user_input)
         
         data = self.rag.retrieve_data(user_input)
+        print("data")
         prompt_text = \
             (
                 "Nutze die folgenden Informationen zur Beantwortung der Frage. "
@@ -82,11 +83,3 @@ class LLMChatbot:
         except Exception as e:
             print(f"Error: {e}")
             return None
-    
-    def clear_history(self) -> None:
-        """
-        Clear conversation history
-        Returns: None
-        """
-        self.conversation_history = [{"role": "system", "content": SYSTEM_PROMPT}]
-        print("Conversation history cleared.")
