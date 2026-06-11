@@ -10,6 +10,8 @@ This agent can help employees to quickly find information about the company with
 or ask colleagues.
 This would be especially useful for product details, where the information is often very detailed.
 
+![Demo](documentation/beckhoff_demo_short_comprimised.gif)
+
 ## Installation & Usage
 
 Create a virtual environment, activate it and install the required dependencies with the following commands:
