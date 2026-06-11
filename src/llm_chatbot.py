@@ -52,7 +52,6 @@ class LLMChatbot:
         self.add_to_history("user", user_input)
         
         data = self.rag.retrieve_data(user_input)
-        print("data")
         prompt_text = \
             (
                 "Nutze die folgenden Informationen zur Beantwortung der Frage. "
